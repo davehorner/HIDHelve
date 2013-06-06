@@ -1,3 +1,27 @@
 [submodule "lib/hidapi"]
 	path = lib/hidapi
 	url = https://github.com/signal11/hidapi.git
+[submodule "lib\\rpavlik-cmake-modules"]
+	path = lib\\rpavlik-cmake-modules
+	url = https://github.com/rpavlik/cmake-modules.git
+[submodule "lib/pion"]
+	path = lib/pion
+	url = https://github.com/cloudmeter/pion
+[submodule "lib/log4cplus"]
+	path = lib/log4cplus
+	url = https://github.com/cloudmeter/log4cplus.git
+[submodule "lib/boost"]
+	path = lib/boost
+	url = https://github.com/cloudmeter/boost.git
+[submodule "lib/openssl"]
+	path = lib/openssl
+	url = https://github.com/cloudmeter/openssl.git
+[submodule "lib/yajl"]
+	path = lib/yajl
+	url = https://github.com/lloyd/yajl.git
+[submodule "lib/icu4c"]
+	path = lib/icu4c
+	url = https://github.com/cloudmeter/icu4c.git
+[submodule "lib\\zlib"]
+	path = lib\\zlib
+	url = https://github.com/madler/zlib.git
