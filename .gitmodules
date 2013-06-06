@@ -10,9 +10,6 @@
 [submodule "lib/log4cplus"]
 	path = lib/log4cplus
 	url = https://github.com/cloudmeter/log4cplus.git
-[submodule "lib/boost"]
-	path = lib/boost
-	url = https://github.com/cloudmeter/boost.git
 [submodule "lib/openssl"]
 	path = lib/openssl
 	url = https://github.com/cloudmeter/openssl.git
@@ -22,6 +19,6 @@
 [submodule "lib/icu4c"]
 	path = lib/icu4c
 	url = https://github.com/cloudmeter/icu4c.git
-[submodule "lib\\zlib"]
-	path = lib\\zlib
+[submodule "lib/zlib"]
+	path = lib/zlib
 	url = https://github.com/madler/zlib.git

@@ -1,6 +1,17 @@
-cmake_minimum_required(VERSION 2.8)
 project(HornersHelves)
+set (HornersHelves_VERSION_MAJOR 0)
+set (HornersHelves_VERSION_MINOR 1)
+set (HornersHelves_VERSION_PATCH 0)
+set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set (CPACK_PACKAGE_VERSION_MAJOR "${HornersHelves_VERSION_MAJOR}")
+set (CPACK_PACKAGE_VERSION_MINOR "${HornersHelves_VERSION_MINOR}")
+set (CPACK_PACKAGE_VERSION_MINOR "${HornersHelves_VERSION_PATCH}")
+
+cmake_minimum_required(VERSION 2.8)
+
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/lib/cmake)
 
 add_subdirectory(src)
-add_definitions (-DLOG4CPLUS_STATIC)
-add_subdirectory(lib/log4cplus)
