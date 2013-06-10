@@ -21,6 +21,7 @@ SET(Boost_USE_STATIC_LIBS ON)
 find_package(Boost COMPONENTS program_options regex thread system date_time chrono log REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
+message(STATUS "Boost ${Boost_LIBRARY_DIR}")
 
 set(ICU_DEBUG 1)
 set(ICU_ROOT ../lib/icu4c)
@@ -29,28 +30,14 @@ include_directories(${ICU_INCLUDE_DIRS})
 #include_directories(${PROJECT_SOURCE_DIR}/lib/icu4c/include)
 message(STATUS "ICU ${ICU_LIBRARIES}")
 
-#add_definitions(-DPION_STATIC_LINKING -DPION_USE_LOG4CPLUS)
-#include_directories(${PROJECT_SOURCE_DIR}/lib/pion/include)
-#link_directories(${PROJECT_SOURCE_DIR}/lib/pion/bin/Release_static_Win32)
-#link_directories(${PROJECT_SOURCE_DIR}/lib/pion/bin/Debug_static_Win32)
-#find_package(Pion)
-#if(PION_FOUND)
-#include_directories (${Pion_INCLUDE_DIRS}) 
-#${Pion_LIBRARIES}
-#endif()
-
-#set(LOG4CPLUS_DIR   "${PROJECT_SOURCE_DIR}/lib/log4cplus")
-#set(LOG4CPLUS_INCLUDE_DIR  "${LOG4CPLUS_DIR}/include/log4cplus")
-#message(STATUS "using ${LOG4CPLUS_DIR} and ${LOG4CPLUS_INCLUDE_DIR} for search")
-
-#add_definitions(-DLOG4CPLUS_STATIC)
-#find_package(LOG4CPLUS REQUIRED)
-#include_directories (${LOG4CPLUS_INCLUDE_DIR})
-#link_directories(C:/log4cplus-1.0.4.1/bin/x64)
+file(GLOB HIDHelve_INCLUDEDIR "${PROJECT_SOURCE_DIR}/include" "${PROJECT_SOURCE_DIR}/include/*.h")
+message(STATUS "FIND HEADERS ${HIDHelve_INCLUDEDIR}")
 
 include_directories("${PROJECT_SOURCE_DIR}/include"
                     "${PROJECT_SOURCE_DIR}/src")
-add_executable(HIDHelve hidhelve.cpp)
+add_executable(HIDHelve hidhelve.cpp 
+"${PROJECT_SOURCE_DIR}/include/hidhelve_log.h"
+"${PROJECT_SOURCE_DIR}/include/hidhelve_version.h")
 set(CMAKE_CXX_STANDARD_LIBRARIES setupapi.lib)
 target_link_libraries(HIDHelve hidapi ${Boost_LIBRARIES}  ${ICU_LIBRARIES})
 add_dependencies (HIDHelve hidapi log4cplus)
