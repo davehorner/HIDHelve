@@ -52,13 +52,8 @@ Horner's HID Helve
 
 #include <boost/regex/icu.hpp>
 
-#include <boost/log/trivial.hpp>
-#define LOG_TRACE(LOGTEXT)  BOOST_LOG_TRIVIAL(trace)   << LOGTEXT;
-#define LOG_DEBUG(LOGTEXT)  BOOST_LOG_TRIVIAL(debug)   << LOGTEXT;
-#define LOG_INFO(LOGTEXT)   BOOST_LOG_TRIVIAL(info)    << LOGTEXT;
-#define LOG_WARN(LOGTEXT)   BOOST_LOG_TRIVIAL(warning) << LOGTEXT;
-#define LOG_ERROR(LOGTEXT)  BOOST_LOG_TRIVIAL(error)   << LOGTEXT;
-#define LOG_FATAL(LOGTEXT)  BOOST_LOG_TRIVIAL(fatal)   << LOGTEXT;
+#include "hidhelve_version.h"
+#include "hidhelve_log.h"
 
 using namespace std;
 using namespace boost;
@@ -329,10 +324,10 @@ int wmain(int argc, _TCHAR* argv[])
         LOG_INFO("Product RegEx: "<<theProductRegx.c_str())
     }
 
-    _snwprintf_s(wstr,MAX_STR,theSlotServerName, theSubSlotName.c_str());
-    LOG_INFO("ControlSlot: "<<wstr)
     _snwprintf_s(wstr,MAX_STR,theSlotClientName, theDomain.c_str(), theSubSlotName.c_str());
     LOG_INFO("PublishSlot: "<<wstr)
+    _snwprintf_s(wstr,MAX_STR,theSlotServerName, theDomain.c_str(), theSubSlotName.c_str());
+    LOG_INFO("ControlSlot: "<<wstr)
 
     theSlotServerHandle=CreateMailslot(wstr,0,0,(LPSECURITY_ATTRIBUTES)NULL);
     if (theSlotServerHandle == INVALID_HANDLE_VALUE) 

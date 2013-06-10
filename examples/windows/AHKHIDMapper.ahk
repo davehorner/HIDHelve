@@ -19,11 +19,10 @@ if ErrorLevel {
 }
 arc := NumGet(si,0,"ushort")
 if arc {
-    HIDHELVEPATH=x64\HIDHelve
+    HIDHELVEPATH=%A_ScriptDir%\x64\HIDHelve.exe
 } else {
-    HIDHELVEPATH=x86\HIDHelve
+    HIDHELVEPATH=%A_ScriptDir%\x86\HIDHelve.exe
 }
-MsgBox %HIDHELVEPATH%
 	
 Gui, Font, s8 c000000, Consolas
 Gui, Color,, 3F3F3F
@@ -43,13 +42,14 @@ Gui, Add, Button, w100 h20 yp xp+100 vPTCode, Paste
 Gui, +Resize +HwndMainHwnd ;+ToolWindow +E0x40000
 
 Gui, Tab, Watch
-Gui, Font, s10 cEDEDCD, Consolas
+Gui, Font, s10 c3F3F3F, Consolas
 Gui, Color,, 3F3F3F
 Gui, Add, Edit, VScroll HScroll w400 h300 x10 y30 vInfoOut -Wrap HwndInfoHwnd
-GUI, Add, Button, gClearOutput x+0 y30, Clear Output
 GUI, Add, Button, gStart x+0 y30, Start HIDHelve
-GUI, Add, Button, gKill x+0 y75, Kill HIDHelve
-GUI, Add, Button, gExit x+0 y75, Exit %AppTitle%
+GUI, Add, Button, gKill x+1 y30, Kill HIDHelve
+GUI, Add, Button, gExit x410 y60, Exit %AppTitle%
+GUI, Add, Button, gClearOutput x410 y90, Clear Output
+Gui, Add, Checkbox, vShowHidHelve, Show HidHelve?
 Gui, Show, , %AppTitle%
 
 HIDHelveCreatePublishingSlot()
@@ -131,16 +131,20 @@ HIDHelveCreatePublishingSlot()
 {
 	global mySlotHandle,HIDHELVEPATH
 	SlotTimeout=50 ;0=no wait, -1=forever, else milliseconds.
-    if(mySlotHandle=-1) {
-        mySlotName = \\.\mailslot\hornersHidHelvePublishSlot
-        mySlotHandle:=DLLCall("CreateMailslot",str,mySlotName,UInt,0,UInt,SlotTimeout,UInt,0)
-        if (errorlevel) {
-            clipboard = http://msdn.microsoft.com/en-us/library/ms681381(v=VS.85).aspx	
-            MsgBox CreateMailSlot function returned an error.`nSystem Error Code: %a_lasterror%`n`nLink to error codes is on clipboard.`n`nExiting
-            ;exitapp
-        }
-    }
-	Run %HIDHELVEPATH% -pFoot,,Hide|UseErrorLevel
+	if(mySlotHandle=-1) {
+		mySlotName = \\.\mailslot\hornersHidHelvePublishSlot
+		mySlotHandle:=DLLCall("CreateMailslot",str,mySlotName,UInt,0,UInt,SlotTimeout,UInt,0)
+		if (errorlevel) {
+			clipboard = http://msdn.microsoft.com/en-us/library/ms681381(v=VS.85).aspx	
+			MsgBox CreateMailSlot function returned an error.`nSystem Error Code: %a_lasterror%`n`nLink to error codes is on clipboard.`n`nExiting
+			;exitapp
+		}
+	}
+	runOpts=UseErrorLevel
+	SetWorkingDir %A_ScriptDir%
+	if ShowHidHelve=0
+		runOpts=%runOpts%|Hide
+	Run "%HIDHELVEPATH%" -pFoot,,%runOpts% 
 	if A_ErrorLevel
 		MsgBox HIDHelve could not be launched %A_ErrorLevel%.
 
@@ -152,7 +156,7 @@ HIDHelveClosePublishingSlot()
 	;signal to hidmapper we are quiting!.
 	HIDHelveSendControl(quit!)
 	DllCall("CloseHandle", "Ptr", mySlotHandle)
-    mySlotHandle=-1
+	mySlotHandle=-1
 }
 
 InfoOutput(Text)
