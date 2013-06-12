@@ -28,8 +28,8 @@ if arc {
 Gui, Font, s8 c000000, Consolas
 Gui, Color,, 3F3F3F
 
-Gui, Add, Tab2, x-4 y-0 w750 w400 -Wrap vTabs gTabs, Watch|Quick Editor
-Gui, Tab, Quick Editor                     
+Gui, Add, Tab2, x-4 y-0 w750 w400 -Wrap vTabs gTabs, Watch HidHelve|Quick View
+Gui, Tab, Quick View                     
 FileRead, TCode, %A_ScriptFullPath%
 Gui, Font, s10 cFFFFFF, Consolas                                                                        
 Gui, Color,, 3F3F3F
@@ -44,13 +44,15 @@ Gui, Color,, 3F3F3F
 Gui, Font, s10 cFFFFFF, Consolas
 Gui, Add, Edit, VScroll HScroll w400 h300 x10 y30 vInfoOut -Wrap HwndInfoHwnd
 Gui, Font, s10 c3F3F3F, Consolas
-GUI, Add, Button, gStart x+0 y30, Start HIDHelve
-GUI, Add, Button, gKill x+1 y30, Kill HIDHelve
-GUI, Add, Button, gExit x410 y60, Exit %AppTitle%
-GUI, Add, Button, gClearOutput x410 y90, Clear Output
+GUI, Add, Button, gClearOutput x410 y30, Clear Output
 Gui, Add, Checkbox, vShowHidHelve, Show HidHelve?
 Gui, Font, s10 cFFFFFF, Consolas
 Gui, Add, Edit, R1 vHidHelveArguments, %DEFAULT_ARGUMENTS%
+Gui, Font, s10 c3F3F3F, Consolas
+GUI, Add, Button, gStart x410 y120, Start HIDHelve
+GUI, Add, Button, gKill x410 y150, Kill HIDHelve
+GUI, Add, Button, gExit x410 y190, Exit %AppTitle%
+Gui, Font, s10 cFFFFFF, Consolas
 Gui, Show, , %AppTitle%
 
 HIDHelveCreatePublishingSlot()
