@@ -1,15 +1,15 @@
 /* Written by: Dave Horner
    Date: 1/1/2013
    http://dave.thehorners.com/tech-talk/projects-research/455-horners-hidhelve
-*/
-
+*/         
+        
 #SingleInstance force
 #NoEnv
 DetectHiddenWindows, On
 OnMessage(0x112, "WM_SYSCOMMAND")
 AppTitle=AHKHIDMapper
 mySlotHandle=-1
-
+DEFAULT_ARGUMENTS=-pFoot
 
 VarSetCapacity(si,44)
 DllCall("GetNativeSystemInfo", "uint", &si)
@@ -18,6 +18,7 @@ if ErrorLevel {
     ExitApp
 }
 arc := NumGet(si,0,"ushort")
+
 if arc {
     HIDHELVEPATH=%A_ScriptDir%\x64\HIDHelve.exe
 } else {
@@ -27,29 +28,29 @@ if arc {
 Gui, Font, s8 c000000, Consolas
 Gui, Color,, 3F3F3F
 
-Gui, Add, Tab2, x-4 y-0 w750 h850 -Wrap vTabs gTabs, Watch|Quick Editor
-Gui, Font, s10 cEDEDCD, Consolas
-Gui, Color,, 3F3F3F
-Gui, Tab, Quick Editor
+Gui, Add, Tab2, x-4 y-0 w750 w400 -Wrap vTabs gTabs, Watch|Quick Editor
+Gui, Tab, Quick Editor                     
 FileRead, TCode, %A_ScriptFullPath%
+Gui, Font, s10 cFFFFFF, Consolas                                                                        
+Gui, Color,, 3F3F3F
 Gui, Add, Edit, vTCode x10 y30 h250 w300 gTCode -Wrap +WantTab
 +VScroll +HScroll t14 BackgroundTrans hwndTCodeHwnd, % TCode
-Gui, Font
-Gui, Add, Button, w100 h20 yp+255 vRTCode, Run
-Gui, Add, Button, w100 h20 yp xp+100 vGTCode, Gist
-Gui, Add, Button, w100 h20 yp xp+100 vPTCode, Paste
+Gui, Font, s10 cEDEDCD, Consolas
 
 Gui, +Resize +HwndMainHwnd ;+ToolWindow +E0x40000
 
 Gui, Tab, Watch
-Gui, Font, s10 c3F3F3F, Consolas
 Gui, Color,, 3F3F3F
+Gui, Font, s10 cFFFFFF, Consolas
 Gui, Add, Edit, VScroll HScroll w400 h300 x10 y30 vInfoOut -Wrap HwndInfoHwnd
+Gui, Font, s10 c3F3F3F, Consolas
 GUI, Add, Button, gStart x+0 y30, Start HIDHelve
 GUI, Add, Button, gKill x+1 y30, Kill HIDHelve
 GUI, Add, Button, gExit x410 y60, Exit %AppTitle%
 GUI, Add, Button, gClearOutput x410 y90, Clear Output
 Gui, Add, Checkbox, vShowHidHelve, Show HidHelve?
+Gui, Font, s10 cFFFFFF, Consolas
+Gui, Add, Edit, R1 vHidHelveArguments, %DEFAULT_ARGUMENTS%
 Gui, Show, , %AppTitle%
 
 HIDHelveCreatePublishingSlot()
@@ -78,12 +79,22 @@ loop
 				SendInput +^{b}
 				continue
 			}
+			/*
+			http://www.autohotkey.com/docs/commands/Send.htm
+			http://www.autohotkey.com/board/topic/41510-is-there-any-way-to-get-shift-to-toggle-like-caps-lock/
+			*/
+			Send {Blind}{LShift Down}
 			if GetKeyState("Ctrl", "P")
 				SoundPlay *-1
 		} else if(cs=0) {
-			
+		        Send {Blind}{Ctrl Up}
+			Send {Blind}{LShift Up}			
 		} else if(cs=1 && ps=1) {
-			Run ::{20d04fe0-3aea-1069-a2d8-08002b30309d}
+			IfWinActive , Microsoft Visual Studio
+			{
+				Run ::{20d04fe0-3aea-1069-a2d8-08002b30309d}
+			}
+		        Send {Blind}{Ctrl Down}
 		}	
 	}
 }
@@ -99,7 +110,7 @@ HIDHelveSendControl(message)
 		DllCall("WriteFile", uint, hidSlotHandle, str, message, uint, StrLen(message)+1, uintp,0, uint,0)
 		DllCall("CloseHandle", "Ptr", hidSlotHandle)
 	} else {
-		MsgBox controlling HIDHelve failed. (%message%)
+		MsgBox CreateFile function returned an error.`nSystem Error Code: %a_lasterror%`n`n controlling HIDHelve failed. (%message%)`n`nExiting
 	}
 }
 
@@ -142,9 +153,13 @@ HIDHelveCreatePublishingSlot()
 	}
 	runOpts=UseErrorLevel
 	SetWorkingDir %A_ScriptDir%
-	if ShowHidHelve=0
+	GuiControlGet, ShowHidHelve,, ShowHidHelve
+	if ShowHidHelve=1
+		runOpts=%runOpts%
+	else
 		runOpts=%runOpts%|Hide
-	Run "%HIDHELVEPATH%" -pFoot,,%runOpts% 
+        GuiControlGet, HidHelveArguments
+	Run "%HIDHELVEPATH%" "%HidHelveArguments%",,%runOpts% 
 	if A_ErrorLevel
 		MsgBox HIDHelve could not be launched %A_ErrorLevel%.
 
@@ -168,44 +183,6 @@ InfoOutput(Text)
    SendMessage, 0x115, 0x0000007, 0, , ahk_id %InfoHwnd%
    return
 }
-CodeOutput(Text)
-{
-   GuiControlGet, CodeOut
-   IfNotInString, CodeOut, %Text%
-   {
-      NewText := CodeOut . Text
-      GuiControl, , CodeOut, %NewText%
-   }
-   return
-}
-
-AppendOutput(Text)
-{
-   global EditHwnd
-   GuiControlGet, EditOut
-   NewText := EditOut . Text
-   GuiControl, , EditOut, %NewText%
-   ; WM_VSCROLL (0x115), SB_BOTTOM (7)
-   ;MsgBox, %EditHwnd%
-   SendMessage, 0x115, 0x0000007, 0, , ahk_id %EditHwnd%
-   return
-}
-
-Start:
-	HIDHelveCreatePublishingSlot()
-	GuiControlGet, InfoOut
-	GuiControl, , InfoOut 
-	SendMessage, 0x115, 0x0000007, 0, , ahk_id %InfoHwnd%
-	GuiControlGet, InfoOut
-Return
-
-Kill:
-	HIDHelveClosePublishingSlot()
-	GuiControlGet, InfoOut
-	GuiControl, , InfoOut 
-	SendMessage, 0x115, 0x0000007, 0, , ahk_id %InfoHwnd%
-	GuiControlGet, InfoOut
-Return
 
 ClearOutput:
    GuiControlGet, InfoOut
@@ -213,9 +190,20 @@ ClearOutput:
    SendMessage, 0x115, 0x0000007, 0, , ahk_id %InfoHwnd%
 Return
 
+Start:        
+	HIDHelveCreatePublishingSlot()
+	goto ClearOutput
+Return
+
+Kill:
+	HIDHelveClosePublishingSlot()
+	goto ClearOutput
+Return
+
+
 F10::Reload
 
-Tabs:
+Tabs:                 
 ;Gui, Submit, NoHide
 ;Gui, +OwnDialogs
 Return
@@ -226,17 +214,14 @@ if !(A_GuiWidth || A_GuiHeight)
 TCW := A_GuiWidth - 30
 BSize := (A_GuiWidth - 30) / 3
 BY := A_GuiHeight - 40
-TCH := BY - 10
+TCH := BY - 50
 BX1 := 5
 BX2 := BX1 + BSize
 BX3 := BX2 + BSize
  
-;gosub, TCode
-GuiControl, Move, Tabs, w%TCW% h%TCH% 
-GuiControl, Move, TCode, w%TCW% h%TCH% 
-GuiControl, Move, RTCode, w%BSize% y%BY% x%BX1%
-GuiControl, Move, GTCode, w%BSize% y%BY% x%BX2%
-GuiControl, Move, PTCode, w%BSize% y%BY% x%BX3%
+GuiControl, Move, Tabs, w%A_GuiWidth% h%A_GuiHeight% 
+GuiControl, Move, InfoOut, h%BY% 
+GuiControl, Move, TCode, w%TCW% h%BY% 
 return
  
 TCode:
@@ -257,79 +242,6 @@ ClearTip:
 ToolTip
 return
  
-ButtonRun:
-return
- 
-RTCode:
-Gui, Submit, NoHide
-FileDelete, Test.ahk
-FileAppend, %TCode%, Test.ahk, UTF-8 ; Make sure unicode
-Run, Test.ahk
-WinWait, %TestTitle%,, 1
-GuiControl, Text, RTCode, Kill
-while(WinExist(TestTitle))
-	Sleep, 500
-GuiControl, Text, RTCode, Run
-return
- 
- 
- 
-ButtonSave: ; Need to clean this up
-Gui, Submit, NoHide
-InputBox, Name, Script Name, Choose a name for your script (No trailing ".ahk")
-if Name =
-	return
-FileAppend, %TCode%, %Name%.ahk, UTF-8
-return
- 
- 
- 
-ButtonGist:
-Gui, Submit, NoHide
- 
-Gui, Gist:New, +Owner1 +ToolWindow
-Gui, Add, Text, Section ym+2 w50 +Center, Username
-Gui, Add, Text, w50 +Center, Password
-Gui, Add, Text, w50 +Center, Gist Title
-Gui, Add, CheckBox, yp+28 w50 +Center checked vPublic, Public
-Gui, Add, Edit, ys-2 xs+58 w100 vUser, %DefaultUser%
-Gui, Add, Edit, w100 +Password vPass, %DefaultPass%
-Gui, Add, Edit, w100 vTitle, %DefaultTitle%
-Gui, Add, Button, w100 h20 gGistButtonGist, Paste Gist
-Gui, Show,, %Title% - Gist
-return
- 
-GistButtonGist:
-Gui, Submit
-Gui, Destroy
- 
-DefaultUser := User
-DefaultPass := Pass
- 
-Link := Gist(TCode, User, Pass, Title, Public)
-MsgBox, 292, %Title%, Link aquired:`n%Link%`n`nCopy to clipboard?
-IfMsgBox, Yes
-	Clipboard := Link
-return
- 
- 
- 
-ButtonPaste:
-Gui, Submit, NoHide
- 
-Gui, Paste:New, +Owner1 +ToolWindow
-Gui, Add, Edit, w100 vDesc, %DefaultDesc%
-Gui, Add, Edit, w100 vAuthor, %DefaultAuthor%
-Gui, Add, Checkbox, y+9 w50 vPublic, Public
-Gui, Add, Button, Default yp-5 xp+50 w50, Paste
-Gui, Show,, %Title% - Paste
-return
- 
-PasteButtonPaste:
-Gui, Submit
-Gui, Destroy
-return
- 
 GetSize(Text, DefaultGUI = 1, Font="Consolas", Size="10")
 {
 	static
@@ -344,75 +256,6 @@ GetSize(Text, DefaultGUI = 1, Font="Consolas", Size="10")
 	return {"X":CntrlX, "Y":CntrlY, "W":CntrlW+1, "H":CntrlH-2} ;CntrlW
 }
  
-Gist(Code, NewUser="", NewPass="", Title="AutoHotkey", Public="1")
-{
-	static Basic, User, Pass
-	
-	if (User != NewUser || Pass != NewPass) ; If new credentials
-	{
-		User := NewUser
-		Pass := NewPass
-		if (User && Pass) ; If not blank
-			Basic := Base64(User ":" Pass) ; Create new basic auth code
-		else
-			Basic := ; Don't auth (anonymous)
-	}
-	
-	Public := Public ? "true" : "false"
-	Code := SanitizeJSON(Code)
-	
-	JSON = {"public":"%Public%","files":{"%Title%":{"content":"%Code%"}}}
-	
-	Github := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-	Github.Open("POST", "https://api.github.com/gists")
-	if (Basic)
-		Github.SetRequestHeader("authorization", "basic " Basic)
-	Github.Send(JSON)
-	
-	If !RegExMatch(Github.ResponseText, """html_url""\:""(.*?)""", Out)
-		throw Github.ResponseText
-	return Out1
-}
- 
-Base64(string)
-{ ; http://www.autohotkey.com/forum/viewtopic.php?t=5896
-   Loop Parse, string
-   {
-      If Mod(A_Index,3) = 1
-         buffer := Asc(A_LoopField) << 16
-      Else If Mod(A_Index,3) = 2
-         buffer += Asc(A_LoopField) << 8
-      Else {
-         buffer += Asc(A_LoopField)
-         out := out . Code(buffer>>18) . Code(buffer>>12) . Code(buffer>>6) . Code(buffer)
-      }
-   }
-   If Mod(StrLen(string),3) = 0
-      Return out
-   If Mod(StrLen(string),3) = 1
-      Return out . Code(buffer>>18) . Code(buffer>>12) "=="
-   Return out . Code(buffer>>18) . Code(buffer>>12) . Code(buffer>>6) "="
-}
- 
-Code(i)     ; <== Chars[i & 63], 0-base index
-{
-   static Chars := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-   StringMid i, Chars, (i&63)+1, 1
-   Return i
-}
- 
-SanitizeJSON(J)
-{
-	StringReplace, J, J, \, \\, All
-	StringReplace, J, J, `b, \b, All
-	StringReplace, J, J, `f, \f, All
-	StringReplace, J, J, `n, \n, All
-	StringReplace, J, J, `r, \r, All
-	StringReplace, J, J, `t, \t, All
-	StringReplace, J, J, `", \`", All
-	return J
-}
-  
 ; http://www.autohotkey.com/board/topic/29912-sb-functions-for-scrollbar/
 SB_Show(hwnd, Which="V"){
     Which := (Which="V" || Which=1) ? 1 : (Which="H" || Which=0) ? 0 : 1
@@ -472,6 +315,6 @@ Exit:
 GuiEscape:
 GuiClose:
 	Menu, Tray, NoIcon
-    HIDHelveClosePublishingSlot()
+	HIDHelveClosePublishingSlot()
 	Gui, Submit
 	ExitApp
