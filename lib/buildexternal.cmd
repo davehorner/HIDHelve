@@ -2,11 +2,21 @@
 
 set U_STATIC_IMPLEMENTATION=1
 
+set /p buildtype="Would you like to build 64bit(N) or 32bit(y)? (y/N): " %=%
+set BUILDBITS=64
+set BUILDXXX=x64
+if "%buildtype%"=="y" (
+set BUILDBITS=32
+set BUILDXXX=Win32
+)
+
+
+:build64
 set /p icu4c="Would you like to building icu.(y/N): " %=%
 if "%icu4c%"=="y" (
 devenv icu4c\source\allinone\allinone.sln /Clean 
-devenv icu4c\source\allinone\allinone.sln /Build "Debug|x64" 
-devenv  icu4c\source\allinone\allinone.sln /Build "Release|x64" 
+rem devenv icu4c\source\allinone\allinone.sln /Build "Debug|%BUILDXXX%" 
+devenv  icu4c\source\allinone\allinone.sln /Build "Release|%BUILDXXX%" 
 )
 set /p boost="Would you like to building boost.(y/N): " %=%
 if "%boost%"=="y" ( 
@@ -14,12 +24,11 @@ set ICU_PATH=%~dp0%icu4c
 echo USING ICU %ICU_PATH%
 cd boost
 bootstrap.bat
-b2 --clean-all
-b2.exe define=U_STATIC_IMPLEMENTATION=1  -sICU_PATH=%ICU_PATH% -j10 --toolset=msvc-10.0 architecture=x86 address-model=64 --build-type=complete stage
+b2 --clean-all --toolset=msvc-10.0
+rem .\b2 -a -d 0 -q -j 4 -d 0 variant=debug,release link=shared,static threading=multi address-model=32 toolset=msvc-10.0
+b2.exe define=U_STATIC_IMPLEMENTATION=1  -sICU_PATH=%ICU_PATH% -j10 --toolset=msvc-10.0 architecture=x86 address-model=%BUILDBITS% --stagedir=stage%BUILDBITS% --build-type=complete stage
 cd ..
 )
-
-rem boost.locale.iconv=off boost.locale.winapi=off boost.locale.std=off
 exit /b 1;
 
 

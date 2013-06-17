@@ -227,6 +227,15 @@ int wmain(int argc, _TCHAR* argv[])
 
     LOG_INFO("compiled: "<<__DATE__<<" at "<<__TIME__)
     LOG_DEBUG("_INTEGRAL_MAX_BITS?"<<_INTEGRAL_MAX_BITS)
+    LOG_DEBUG("sizeof(size_t)?"<<sizeof(size_t))
+#ifdef _WIN64
+	LOG_DEBUG("_WIN64?"<<_WIN64)
+#endif
+#ifdef _WIN32
+    LOG_DEBUG("_WIN32?"<<_WIN32)
+#endif
+	
+
     LOG_DEBUG("_MSC_VER?"<<_MSC_VER)
     LOG_DEBUG("_CPPLIB_VER?"<<_CPPLIB_VER)
 #ifdef _DEBUG
