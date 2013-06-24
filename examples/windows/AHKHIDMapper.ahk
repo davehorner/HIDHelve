@@ -44,14 +44,15 @@ Gui, Color,, 3F3F3F
 Gui, Font, s10 cFFFFFF, Consolas
 Gui, Add, Edit, VScroll HScroll w400 h300 x10 y30 vInfoOut -Wrap HwndInfoHwnd
 Gui, Font, s10 c3F3F3F, Consolas
-GUI, Add, Button, gClearOutput x410 y30, Clear Output
+GUI, Add, Button, vClearOutput x410 y30 gClearOutput, Clear Output
 Gui, Add, Checkbox, vShowHidHelve, Show HidHelve?
 Gui, Font, s10 cFFFFFF, Consolas
 Gui, Add, Edit, R1 vHidHelveArguments, %DEFAULT_ARGUMENTS%
 Gui, Font, s10 c3F3F3F, Consolas
-GUI, Add, Button, gStart x410 y120, Start HIDHelve
-GUI, Add, Button, gKill x410 y150, Kill HIDHelve
-GUI, Add, Button, gExit x410 y190, Exit %AppTitle%
+GUI, Add, Button, vStart x410 y120 gStart, Start HIDHelve
+GUI, Add, Button, vKill x410 y150 gKill, Kill HIDHelve
+GUI, Add, Button, vListDevices x410 y180 gListDevices, List Devices
+GUI, Add, Button, vExit x410 y210 gExit, Exit %AppTitle%
 Gui, Font, s10 cFFFFFF, Consolas
 Gui, Show, , %AppTitle%
 
@@ -214,16 +215,23 @@ GuiSize:
 if !(A_GuiWidth || A_GuiHeight)
 	return
 TCW := A_GuiWidth - 30
-BSize := (A_GuiWidth - 30) / 3
 BY := A_GuiHeight - 40
 TCH := BY - 50
-BX1 := 5
-BX2 := BX1 + BSize
-BX3 := BX2 + BSize
+InfoW := A_GuiWidth - 160
+InfoC := A_GuiWidth - 145
  
 GuiControl, Move, Tabs, w%A_GuiWidth% h%A_GuiHeight% 
-GuiControl, Move, InfoOut, h%BY% 
+GuiControl, Move, InfoOut, w%InfoW% h%BY% 
 GuiControl, Move, TCode, w%TCW% h%BY% 
+
+GuiControl, Move, TCode, w%TCW% h%BY% 
+GuiControl, Move, ClearOutput, x%InfoC%
+GuiControl, Move, ShowHidHelve, x%InfoC%
+GuiControl, Move, HidHelveArguments, x%InfoC%
+GuiControl, Move, Start, x%InfoC%
+GuiControl, Move, Kill, x%InfoC%
+GuiControl, Move, ListDevices, x%InfoC%
+GuiControl, Move, Exit, x%InfoC%
 return
  
 TCode:
@@ -312,6 +320,17 @@ Restore:
 	Menu, Tray, NoIcon
 	Gui, Show
 Return
+
+ListDevices:
+objShell := ComObjCreate("WScript.Shell")
+LISTDEVICES=%HIDHELVEPATH% -l
+objExec := objShell.Exec(LISTDEVICES)
+strStdOut := ""
+while, !objExec.StdOut.AtEndOfStream
+    strStdOut := objExec.StdOut.ReadAll()
+InfoOutput(strStdOut)
+Return
+
 
 Exit:
 GuiEscape:
